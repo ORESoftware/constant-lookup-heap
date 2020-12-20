@@ -18,6 +18,9 @@ class Wrapper<V extends Value> {
 
   constructor(val: V) {
     this.val = val;
+    this.leftChild = <Wrapper<V>><unknown>null;
+    this.parent = <Wrapper<V>><unknown>null;
+    this.rightChild = <Wrapper<V>><unknown>null;
   }
 
   getValue(){
@@ -29,8 +32,13 @@ class Wrapper<V extends Value> {
 export class MinHeap<Key, V extends Value> {
 
   map = new Map<Key, V>()
-  root: Wrapper<V> = null as Wrapper<V>;
-  toe: Wrapper<V> = null as Wrapper<V>;
+  root: Wrapper<V>
+  toe: Wrapper<V>
+
+  constructor() {
+    this.root = <Wrapper<V>><unknown>null;
+    this.toe = <Wrapper<V>><unknown>null;
+  }
 
   private swapLeft(child: Wrapper<V>, parent: Wrapper<V>){
 
@@ -38,7 +46,10 @@ export class MinHeap<Key, V extends Value> {
       throw 'implementation error 3'
     }
 
+    const clc = child.leftChild;
     child.leftChild = parent;
+    parent.leftChild = clc;
+
     child.parent = parent.parent;
     const crc = child.rightChild;
     child.rightChild = parent.rightChild
@@ -53,6 +64,15 @@ export class MinHeap<Key, V extends Value> {
       throw 'implementation error 2'
     }
 
+    const crc = child.rightChild
+    child.rightChild = parent;
+    parent.rightChild = crc;
+    child.parent = parent.parent;
+
+    const clc = child.leftChild;
+    child.leftChild = parent.leftChild
+    parent.leftChild = clc;
+    parent.parent = child;
 
   }
 
@@ -102,7 +122,8 @@ export class MinHeap<Key, V extends Value> {
       w.parent = this.toe.rightChild;
     }
 
-
+    this.bubbleUp(w);
+    return true;
 
   }
 
