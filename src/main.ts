@@ -187,6 +187,7 @@ export class MinHeap<Key, V extends Value> {
 
     if (w.parent.getCompareValue() <= w.getCompareValue()) {
       // we dont swap if parent value is less than or equal
+      console.log()
       return;
     }
 
@@ -271,7 +272,7 @@ export class MinHeap<Key, V extends Value> {
 
     const toe = this.findElemAt(Math.floor(nextLoc/2))
 
-    console.log('toe:', JSON.stringify(toe, null, 2));
+    console.log('toe before:', JSON.stringify(toe, null, 2));
 
     if (!toe.leftChild) {
 
@@ -293,6 +294,8 @@ export class MinHeap<Key, V extends Value> {
       // console.log(util.inspect({toe}, {depth: 30}));
       throw new Error('toe should not have two children!!')
     }
+
+    console.log('toe after:', JSON.stringify(toe, null, 2));
 
     w.parent = toe;
 
