@@ -54,14 +54,14 @@ export class Troop implements Value {
 }
 
 export class MinHeap<Key, V extends Value> {
+
   map = new Map<Key, V>();
   root: Wrapper<V>;
   size = 0
 
   constructor() {
-    // this.root = <Wrapper<V>>(<unknown>null);
-    // this.toe = <Wrapper<V>>(<unknown>null);
-    this.root = new Wrapper<V>(new Troop(0))
+    this.root = <Wrapper<V>>(<unknown>null);
+    // this.root = new Wrapper<V>(new Troop(0))
   }
 
   private swapLeft(child: Wrapper<V>, parent: Wrapper<V>) {
@@ -71,18 +71,21 @@ export class MinHeap<Key, V extends Value> {
     }
 
     if(this.root === parent){
+      // throw 'this works xxx'
       this.root = child;
     }
 
     const clc = child.leftChild;
-    child.leftChild = parent;
-    parent.leftChild = clc;
+    const crc = child.rightChild;
+    const prc = parent.rightChild
 
     child.parent = parent.parent;
-    const crc = child.rightChild;
-    child.rightChild = parent.rightChild;
+    child.leftChild = parent;
+    parent.leftChild = clc;
+    child.rightChild = prc;
     parent.rightChild = crc;
     parent.parent = child;
+
   }
 
   private swapRight(child: Wrapper<V>, parent: Wrapper<V>) {
@@ -92,18 +95,22 @@ export class MinHeap<Key, V extends Value> {
     }
 
     if(this.root === parent){
+      // throw 'this works szz'
       this.root = child;
     }
 
     const crc = child.rightChild;
-    child.rightChild = parent;
-    parent.rightChild = crc;
-    child.parent = parent.parent;
-
     const clc = child.leftChild;
-    child.leftChild = parent.leftChild;
-    parent.leftChild = clc;
+    const plc = parent.leftChild
+    const pp = parent.parent
+
+    child.parent = pp;
     parent.parent = child;
+    child.leftChild = plc;
+    parent.leftChild = clc;
+    parent.rightChild = crc;
+    child.rightChild = parent;
+
   }
 
   private prettyPrint(){
@@ -151,11 +158,16 @@ export class MinHeap<Key, V extends Value> {
 
     // this.prettyPrint();
 
-    if (w.parent === null) {
+    if (!w.parent) {
+      // console.log({w, root: this.root})
+      if(this.root !== w){
+        throw new Error('root is not equal to expected object')
+      }
       return;
     }
 
     if (w.parent.getCompareValue() <= w.getCompareValue()) {
+      // we dont swap if parent value is less than or equal
       return;
     }
 
@@ -177,11 +189,11 @@ export class MinHeap<Key, V extends Value> {
     const binaryRepresentation = num.toString(2);
     const list = binaryRepresentation.split('').slice(1); // remove first element with slice
 
-    console.log({list});
+    console.log({nextLoc: num, list, binaryRepresentation})
 
     let el = this.root;
 
-    while(list.length){
+    while(list.length > 0){
       const v = list.pop()
       if(v === '0'){
         el = el.leftChild;
@@ -191,6 +203,8 @@ export class MinHeap<Key, V extends Value> {
         throw new Error(`implementation error 99`)
       }
     }
+
+    console.log(el.getCompareValue())
 
     return el;
 
@@ -216,19 +230,36 @@ export class MinHeap<Key, V extends Value> {
     const w = new Wrapper<V>(v);
 
     if (this.root === null) {
+      // throw new Error('root should never be null')
       this.root = w;
       return true;
     }
 
     const toe = this.findElemAt(Math.floor(nextLoc/2))
 
+
     if (!toe.leftChild) {
+
+      if(toe.rightChild){
+        throw new Error('no left child, but has right child .. sad')
+      }
+
       toe.leftChild = w;
-      w.parent = toe;
+
     } else if (!toe.rightChild) {
+
+      if(!toe.leftChild){
+        throw new Error('attempting to assign to right child but no left?')
+      }
+
       toe.rightChild = w;
-      w.parent = toe
+
+    } else {
+      // console.log(util.inspect({toe}, {depth: 30}));
+      throw new Error('toe should not have two children!!')
     }
+
+    w.parent = toe;
 
     this.bubbleUp(w);
     return true;
