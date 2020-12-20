@@ -1,4 +1,4 @@
 #!/usr/bin/env node
-'use strict';
+"use strict";
 
-console.log('this is your command line app.');
+console.log("this is your command line app.");
