@@ -1,32 +1,32 @@
 "use strict";
 
-import { MinHeap } from "./main";
+import {MinHeap, Value} from "./main";
 import * as util from "util";
 
 const mh = new MinHeap();
 
-mh.add("foo", {
-  getValue(): number {
-    return 4;
-  },
-});
+class Boop implements Value {
 
-mh.add("bar", {
-  getValue(): number {
-    return 6;
-  },
-});
+  val: number;
 
-mh.add("star", {
-  getValue(): number {
-    return 6;
-  },
-});
+  constructor(val: number) {
+    this.val = val;
+  }
 
-mh.add("ggg", {
-  getValue(): number {
-    return 3;
-  },
-});
+  getCompareValue(): number {
+    return this.val;
+  }
+
+}
+mh.add("star", new Boop(7));
+mh.add("foo", new Boop(4));
+
+mh.add("bar", new Boop(6));
+//
+mh.add("ggg", new Boop(3));
 
 console.log(util.inspect(mh, { depth: 30 }));
+
+console.log(util.inspect(mh.readMin(), {depth: 30}));
+
+console.log(util.inspect(mh.readMax(), {depth: 30}));

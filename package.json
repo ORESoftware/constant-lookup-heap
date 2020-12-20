@@ -30,7 +30,9 @@
     "url": "https://github.com/ORESoftware/typescript-library-skeleton/issues"
   },
   "homepage": "https://github.com/ORESoftware/typescript-library-skeleton#readme",
-  "dependencies": {},
+  "dependencies": {
+    "@oresoftware/safe-stringify": "^0.0.111"
+  },
   "devDependencies": {
     "@types/node": "^12.7.2",
     "typescript": "^3.5.3"
