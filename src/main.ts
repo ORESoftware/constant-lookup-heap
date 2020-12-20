@@ -26,10 +26,20 @@ class Wrapper<V extends Value> {
   }
 
   toJSON(): any{
+
+    if(this.rightChild === this){
+      throw 'right child is this'
+    }
+
+    if(this.leftChild === this){
+      throw 'left child is this'
+    }
+
     return {
       [this.val.getCompareValue()]: {
-        left: this.leftChild && this.leftChild.toJSON(),
-        right: this.rightChild && this.rightChild.toJSON()
+        left: this.leftChild && this.leftChild.getCompareValue(),
+        right: this.rightChild && this.rightChild.getCompareValue(),
+        parent: this.parent && this.parent.getCompareValue()
       }
     }
   }
@@ -53,6 +63,8 @@ export class Troop implements Value {
 
 }
 
+let rootNull= 0
+
 export class MinHeap<Key, V extends Value> {
 
   map = new Map<Key, V>();
@@ -68,6 +80,10 @@ export class MinHeap<Key, V extends Value> {
 
     if (parent.leftChild !== child) {
       throw "implementation error 3";
+    }
+
+    if(child.parent !== parent){
+      throw 'child parent is not parent in left swap'
     }
 
     if(this.root === parent){
@@ -92,6 +108,10 @@ export class MinHeap<Key, V extends Value> {
 
     if (parent.rightChild !== child) {
       throw "implementation error 2";
+    }
+
+    if(child.parent !== parent){
+      throw 'child parent is not parent in right swap'
     }
 
     if(this.root === parent){
@@ -159,7 +179,6 @@ export class MinHeap<Key, V extends Value> {
     // this.prettyPrint();
 
     if (!w.parent) {
-      // console.log({w, root: this.root})
       if(this.root !== w){
         throw new Error('root is not equal to expected object')
       }
@@ -171,13 +190,23 @@ export class MinHeap<Key, V extends Value> {
       return;
     }
 
+    const wParent = w.parent
+
+    console.log('w before:', JSON.stringify(w, null, 2));
+
     if (w.parent.leftChild === w) {
       this.swapLeft(w, w.parent);
     } else if (w.parent.rightChild === w) {
       this.swapRight(w, w.parent);
     } else {
+      // console.log(util.inspect({w},{depth:50}))
       throw new Error("implementation error 1");
     }
+
+    // console.log('w after:', util.inspect(w, {depth:30}));
+    console.log('w after:', JSON.stringify(w, null, 2));
+    console.log('w parent after:', JSON.stringify(wParent, null, 2));
+    console.log('root:', JSON.stringify(this.root, null, 2));
 
     this.bubbleUp(w);
   }
@@ -224,19 +253,25 @@ export class MinHeap<Key, V extends Value> {
       throw new Error('implementation error 55')
     }
 
+    console.log('w in:', JSON.stringify(v, null, 2));
+
     const nextLoc = ++this.size;
     this.map.set(k, v);
 
     const w = new Wrapper<V>(v);
 
     if (this.root === null) {
-      // throw new Error('root should never be null')
+      rootNull++
+      if(rootNull > 1){
+        throw new Error('root should never be null')
+      }
       this.root = w;
       return true;
     }
 
     const toe = this.findElemAt(Math.floor(nextLoc/2))
 
+    console.log('toe:', JSON.stringify(toe, null, 2));
 
     if (!toe.leftChild) {
 
