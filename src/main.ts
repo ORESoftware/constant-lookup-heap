@@ -25,7 +25,7 @@ class Wrapper<V extends Value> {
     this.rightChild = <Wrapper<V>>(<unknown>null);
   }
 
-  toJSON(){
+  toJSON(): any{
     return {
       [this.val.getCompareValue()]: {
         left: this.leftChild && this.leftChild.toJSON(),
@@ -39,14 +39,29 @@ class Wrapper<V extends Value> {
   }
 }
 
+export class Troop implements Value {
+
+  val: number;
+
+  constructor(val: number) {
+    this.val = val;
+  }
+
+  getCompareValue(): number {
+    return this.val;
+  }
+
+}
+
 export class MinHeap<Key, V extends Value> {
   map = new Map<Key, V>();
   root: Wrapper<V>;
-  toe: Wrapper<V>;
+  size = 0
 
   constructor() {
-    this.root = <Wrapper<V>>(<unknown>null);
-    this.toe = <Wrapper<V>>(<unknown>null);
+    // this.root = <Wrapper<V>>(<unknown>null);
+    // this.toe = <Wrapper<V>>(<unknown>null);
+    this.root = new Wrapper<V>(new Troop(0))
   }
 
   private swapLeft(child: Wrapper<V>, parent: Wrapper<V>) {
@@ -57,10 +72,6 @@ export class MinHeap<Key, V extends Value> {
 
     if(this.root === parent){
       this.root = child;
-    }
-
-    if(this.toe === parent){
-      this.toe = child;
     }
 
     const clc = child.leftChild;
@@ -84,10 +95,6 @@ export class MinHeap<Key, V extends Value> {
       this.root = child;
     }
 
-    if(this.toe === parent){
-      this.toe = child;
-    }
-
     const crc = child.rightChild;
     child.rightChild = parent;
     parent.rightChild = crc;
@@ -101,14 +108,16 @@ export class MinHeap<Key, V extends Value> {
 
   private prettyPrint(){
 
-    const q : Array<[number, Wrapper<V>]> = [[0,this.root]];
+    type Elem = [number, Wrapper<V>]
+
+    const q : Array<Elem> = [[0,this.root]];
     const cols = process.stdout.columns;
 
     let count = 1
     while(q.length){
 
       count++;
-      const [d,v] = q.pop();
+      const [d,v] = q.pop() as Elem;
 
       if(v?.leftChild){
         q.push([d + 1, v.leftChild])
@@ -140,7 +149,7 @@ export class MinHeap<Key, V extends Value> {
 
     // console.log(JSON.stringify(JSON.parse(safe.stringify(this.root)), null, 2))
 
-    this.prettyPrint();
+    // this.prettyPrint();
 
     if (w.parent === null) {
       return;
@@ -161,6 +170,32 @@ export class MinHeap<Key, V extends Value> {
     this.bubbleUp(w);
   }
 
+  private findElemAt(num: number): Wrapper<V>{
+
+    // https://math.stackexchange.com/questions/3955698
+
+    const binaryRepresentation = num.toString(2);
+    const list = binaryRepresentation.split('').slice(1); // remove first element with slice
+
+    console.log({list});
+
+    let el = this.root;
+
+    while(list.length){
+      const v = list.pop()
+      if(v === '0'){
+        el = el.leftChild;
+      } else if (v === '1'){
+        el = el.rightChild;
+      } else {
+        throw new Error(`implementation error 99`)
+      }
+    }
+
+    return el;
+
+  }
+
   add(k: Key, v: V): boolean {
 
     if (this.map.has(k)) {
@@ -171,21 +206,28 @@ export class MinHeap<Key, V extends Value> {
       throw new Error('inserted value must be defined and have a "getCompareValue" method.')
     }
 
+    if(this.size !== this.map.size){
+      throw new Error('implementation error 55')
+    }
+
+    const nextLoc = ++this.size;
     this.map.set(k, v);
+
     const w = new Wrapper<V>(v);
 
     if (this.root === null) {
-      this.root = this.toe = w;
+      this.root = w;
       return true;
     }
 
-    if (!this.toe.leftChild) {
-      this.toe.leftChild = w;
-      w.parent = this.toe;
-    } else if (!this.toe.rightChild) {
-      this.toe.rightChild = w;
-      w.parent = this.toe
-      this.toe = this.toe.leftChild
+    const toe = this.findElemAt(Math.floor(nextLoc/2))
+
+    if (!toe.leftChild) {
+      toe.leftChild = w;
+      w.parent = toe;
+    } else if (!toe.rightChild) {
+      toe.rightChild = w;
+      w.parent = toe
     }
 
     this.bubbleUp(w);
@@ -202,24 +244,23 @@ export class MinHeap<Key, V extends Value> {
   }
 
   readMax(){
+
     if(this.root === null){
       throw 'heap is empty, cannot read min value'
     }
 
-    if(this.toe === null){
-      throw new Error('implementation error 4')
+    const maxElemParent = this.findElemAt(Math.floor(this.size/2))
+
+    if(maxElemParent.rightChild)
+      if(maxElemParent.leftChild.getCompareValue() <= maxElemParent.rightChild.getCompareValue()){
+      return maxElemParent.rightChild.val;
     }
 
-    if(this.toe.rightChild)
-      if(this.toe.leftChild.getCompareValue() <= this.toe.rightChild.getCompareValue()){
-      return this.toe.rightChild.val;
+    if(maxElemParent.leftChild){
+      return maxElemParent.leftChild.val;
     }
 
-    if(this.toe.leftChild){
-      return this.toe.leftChild.val;
-    }
-
-    return this.toe.val;
+    return maxElemParent.val;
 
   }
 

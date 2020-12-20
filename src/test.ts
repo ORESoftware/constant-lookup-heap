@@ -5,7 +5,7 @@ import * as util from "util";
 
 const mh = new MinHeap();
 
-class Boop implements Value {
+export class Boop implements Value {
 
   val: number;
 
@@ -24,8 +24,9 @@ mh.add("foo", new Boop(4));
 mh.add("bar", new Boop(6));
 //
 mh.add("ggg", new Boop(3));
+mh.add("xzz", new Boop(1));
 
-console.log(util.inspect(mh, { depth: 30 }));
+// console.log(util.inspect(mh, { depth: 30 }));
 
 console.log(util.inspect(mh.readMin(), {depth: 30}));
 
